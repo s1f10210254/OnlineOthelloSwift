@@ -50,8 +50,12 @@ export const init = (serverFactory?: FastifyServerFactory) => {
       where: { id: gameId },
       data: { board: updatedBoard, turn: turn === 1 ? 2 : 1 },
     });
-
-    return reply.send(updatedGame);
+    console.log(updatedGame.turn);
+    return reply.send({
+      gameId: gameId,
+      board: updatedGame.board,
+      turn: updatedGame.turn,
+    });
   });
   return app;
 };

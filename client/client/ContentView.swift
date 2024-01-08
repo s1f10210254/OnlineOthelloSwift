@@ -19,7 +19,7 @@ struct ContentView: View {
   @State private var passMessage: String = ""
   @State private var userTurn: Int = 1 // 1 = 黒, 2 = 白
   @State private var gameId: Int?
-  
+
   var body: some View {
     Text("OthelloGame")
       .font(.largeTitle)
@@ -28,11 +28,11 @@ struct ContentView: View {
       Text("白: \(whiteCount)")
     }
     .font(.headline)
-    
+
     Text(turn == 1 ? "黒のターン" : "白のターン")
       .font(.headline)
       .padding()
-    
+
     VStack(spacing: 1) {
       ForEach(0..<rows, id: \.self) { row in
         HStack(spacing: 1) {
@@ -55,16 +55,16 @@ struct ContentView: View {
       startNewGame()
     }
   }
-  
+
   func isUserTurnValid(userTurn: Int) -> Bool {
     return turn == userTurn
   }
-  
+
   func onClick(x: Int, y: Int) {
     if let gameId = self.gameId { // オプショナルバインディングを使用してgameIdをアンラップ
-      print(gameId)
       if isUserTurnValid(userTurn: turn) {
         if board[x][y] == 0 && isMoveValid(x: x, y: y) {
+          print(gameId)
           moveToServer(gameId: gameId, x: x, y: y, turn: turn)
         }
       }
@@ -72,17 +72,17 @@ struct ContentView: View {
       print("gameIdがありません")
     }
   }
-  
+
   //   指定されたマスに駒を置くことが有効かどうかを判断
   func isMoveValid(x: Int, y: Int) -> Bool {
     let validDirections = checkAllDirections(x: x, y: y)
-    
+
     if(validDirections.isEmpty){
       return false
     }
     return !validDirections.isEmpty
   }
-  
+
   // すべての方向をチェックして、反転可能な駒のリストを返す関数
   func checkAllDirections(x: Int, y: Int) -> [(Int, Int)] {
     var validDirections: [(Int, Int)] = []
@@ -97,15 +97,15 @@ struct ContentView: View {
     }
     return validDirections
   }
-  
+
   func updateBoard(x: Int, y: Int) {
     var validDirections: [(Int, Int)] = []
-    
+
     // 盤面の範囲内で隣接するマスを確認
     for dx in -1...1 {
       for dy in -1...1 {
         if dx == 0 && dy == 0 { continue } // 同じマスはスキップ
-        
+
         let pieces = checkDirection(x: x, y: y, dx: dx, dy: dy)
         if !pieces.isEmpty {
           validDirections.append(contentsOf: pieces)
@@ -123,15 +123,15 @@ struct ContentView: View {
     }
     checkNextTurnMoves()
   }
-  
-  
-  
+
+
+
   func checkDirection(x: Int, y: Int, dx: Int, dy: Int) -> [(Int, Int)] {
     var newX = x + dx
     var newY = y + dy
     //反転可能なマスを記録
     var piecesToFlip: [(Int, Int)] = []
-    
+
     while newX >= 0 && newX < rows && newY >= 0 && newY < columns {
       if board[newX][newY] == 3 - turn {
         piecesToFlip.append((newX, newY))
@@ -143,7 +143,7 @@ struct ContentView: View {
         break
       }
     }
-    
+
     return []
   }
   func checkNextTurnMoves() {
@@ -168,7 +168,7 @@ struct ContentView: View {
       passMessage = ""
     }
   }
-  
+
   func checkPossibleMovesAfterPass() {
     possibleMoves = []
     for row in 0..<rows {
@@ -191,7 +191,7 @@ struct ContentView: View {
   func PiceCounts(){
     var newBlackCount = 0
     var newWhiteCount = 0
-    
+
     for row in board {
       for cell in row {
         if cell == 1 {
@@ -201,11 +201,11 @@ struct ContentView: View {
         }
       }
     }
-    
+
     blackCount = newBlackCount
     whiteCount = newWhiteCount
   }
-  
+
   func isBoardFull() -> Bool {
     for row in board {
       for cell in row {
@@ -226,7 +226,7 @@ struct ContentView: View {
       }else if isPossibleMove {
         Rectangle()
           .foregroundColor(Color.yellow.opacity(0.7)) // ハイライト色
-        
+
       } else{
         Rectangle()
           .foregroundColor(pieceColor(piece))
@@ -246,19 +246,19 @@ struct ContentView: View {
       return .clear
     }
   }
-  
-  
-  
-  
+
+
+
+
   func moveToServer(gameId:Int, x:Int, y:Int, turn:Int){
     let url = URL(string: "http://localhost:31577/make-move")!
     var request = URLRequest(url: url)
     request.httpMethod = "POST"
     request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-    
+
     let body: [String: Any] = ["gameId": gameId, "x":x, "y":y, "turn": turn]
     request.httpBody =  try? JSONSerialization.data(withJSONObject: body)
-    
+
     URLSession.shared.dataTask(with: request){data, response, error in
       if let data = data{
         self.updateGameState(from: data)
@@ -280,22 +280,23 @@ struct ContentView: View {
       print("JSON解析エラー: \(error)")
     }
   }
-  
+
   // データの構造体（例）
   struct GameData: Codable {
     var gameId: Int
     var board: [[Int]]
     var turn: Int
   }
-  
+
   // サーバーから新しいゲームデータを取得する
   func startNewGame() {
     let url = URL(string: "http://localhost:31577/start-game")!
     var request = URLRequest(url: url)
     request.httpMethod = "POST"
-    
+
     URLSession.shared.dataTask(with: request) { data, response, error in
       if let data = data {
+        print(String(data:data, encoding: .utf8) ?? "No Data")
         self.updateGameState(from: data)
       }
     }.resume()

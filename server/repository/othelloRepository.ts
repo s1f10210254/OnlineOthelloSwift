@@ -19,6 +19,7 @@ export const createNewGmeSession = async () => {
       turn: 1,
     },
   });
+  console.log("newGame", newGame.id);
   return newGame;
 };
 
@@ -97,6 +98,6 @@ export const updateGameBoard = (
   for (const [flipX, flipY] of validDirections) {
     newBoard[flipX][flipY] = turn;
   }
-
+  // console.log(newBoard);
   return newBoard;
 };
