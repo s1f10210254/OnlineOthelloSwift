@@ -18,6 +18,28 @@ export const init = (serverFactory?: FastifyServerFactory) => {
   app.register(cookie);
   server(app, { basePath: API_BASE_PATH });
 
+  app.post("/search-game", async (request, reply) => {
+    const { roomKey } = request.body as { roomKey: string };
+    try {
+      const game = await prismaClient.game.findFirst({
+        where: { room: roomKey },
+      });
+
+      if (!game) {
+        return reply.status(404).send({ message: "ゲームが見つかりません" });
+      }
+      console.log(game);
+      return reply.send({
+        gameId: game.id,
+        board: game.board,
+        turn: game.turn,
+      });
+    } catch (error) {
+      app.log.error(error);
+      return reply.status(500).send({ message: "サーバーエラー" });
+    }
+  });
+
   app.post("/start-game", async (request, reply) => {
     const gameSession = createNewGmeSession();
 
