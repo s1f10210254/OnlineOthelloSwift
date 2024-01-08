@@ -1,0 +1,23 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("API_DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Task {
+  id        String   @id
+  userId    String
+  label     String
+  done      Boolean
+  createdAt DateTime
+}
+model Game {
+  id        Int      @id @default(autoincrement())
+  board     Json     // ゲームの盤面状態
+  turn      Int  // 現在のターン
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
