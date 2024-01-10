@@ -18,14 +18,14 @@ https://nodejs.org/ja/ の左ボタン、LTS をダウンロードしてイン�
 
 ```sh
 $ npm i
-$ npm i --prefix client
-$ npm i --prefix server
+cd server
+$ npm i
+
 ```
 
 ### 環境変数ファイルの作成
 
 ```sh
-$ cp client/.env.example client/.env
 $ cp server/.env.example server/.env
 $ cp docker/dev/.env.example docker/dev/.env
 ```
